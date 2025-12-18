@@ -1,0 +1,73 @@
+################################
+# Backend – Spring Boot (expense)
+################################
+
+# Application configuration (secrets)
+expense/src/main/resources/application.properties
+expense/src/main/resources/application.yml
+expense/src/main/resources/application-*.properties
+expense/src/main/resources/application-*.yml
+
+# Maven build output
+expense/target/
+expense/build/
+
+# Logs
+expense/logs/
+expense/*.log
+
+################################
+# Frontend – React Vite (frontend)
+################################
+
+# Node dependencies
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# Vite cache
+frontend/.vite/
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/pnpm-debug.log*
+
+################################
+# Environment files
+################################
+
+.env
+.env.*
+frontend/.env
+frontend/.env.*
+
+################################
+# IDE files
+################################
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Eclipse / STS
+.project
+.classpath
+.settings/
+
+################################
+# OS files
+################################
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
