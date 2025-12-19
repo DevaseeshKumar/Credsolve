@@ -1,18 +1,14 @@
 package com.cred.expense.controller;
 
-import java.math.BigDecimal;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.cred.expense.model.Balance;
-import com.cred.expense.model.User;
 import com.cred.expense.repository.BalanceRepository;
-import com.cred.expense.repository.UserRepository;
-
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/balances")
@@ -20,27 +16,22 @@ import lombok.RequiredArgsConstructor;
 public class BalanceController {
 
     private final BalanceRepository balanceRepository;
-    private final UserRepository userRepository;
 
-    /**
-     * Fetch outstanding balance between two users
-     * Example:
-     * GET /balances?from=1&to=2
-     */
     @GetMapping
-    public BigDecimal getBalance(
-            @RequestParam Long from,
-            @RequestParam Long to
-    ) {
-        User fromUser = userRepository.findById(from)
-                .orElseThrow(() -> new RuntimeException("From user not found"));
+    public List<Balance> myBalances(HttpSession session) {
+        Long userId = (Long) session.getAttribute("USER_ID");
 
-        User toUser = userRepository.findById(to)
-                .orElseThrow(() -> new RuntimeException("To user not found"));
+        if (userId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Not logged in"
+            );
+        }
 
-        return balanceRepository
-                .findByFromUserAndToUser(fromUser, toUser)
-                .map(Balance::getAmount)
-                .orElse(BigDecimal.ZERO);
+        return balanceRepository.findAll().stream()
+                .filter(b ->
+                        b.getFromUser().getId().equals(userId) ||
+                        b.getToUser().getId().equals(userId)
+                )
+                .toList();
     }
 }

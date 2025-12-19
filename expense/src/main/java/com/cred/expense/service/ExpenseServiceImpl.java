@@ -1,84 +1,59 @@
 package com.cred.expense.service;
 
-import com.cred.expense.dto.CreateExpenseRequest;
-import com.cred.expense.model.*;
-import com.cred.expense.repository.*;
-import com.cred.expense.strategy.SplitStrategy;
+import com.cred.expense.model.Balance;
+import com.cred.expense.model.Group;
+import com.cred.expense.model.User;
+import com.cred.expense.repository.BalanceRepository;
+import com.cred.expense.repository.UserRepository;
+import com.cred.expense.service.ExpenseService;
+import com.cred.expense.service.GroupService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ExpenseServiceImpl implements ExpenseService {
 
-    private final ExpenseRepository expenseRepo;
-    private final ExpenseSplitRepository splitRepo;
+    private final BalanceRepository balanceRepo;
     private final UserRepository userRepo;
-    private final GroupRepository groupRepo;
-    private final BalanceService balanceService;
-
-    private final Map<String, SplitStrategy> strategyMap;
+    private final GroupService groupService;
 
     @Override
-    public Expense createExpense(CreateExpenseRequest req) {
+    public void addExpense(Long paidById, Long groupId, double amount, List<Long> users) {
 
-        Group group = groupRepo.findById(req.getGroupId())
+        Group group = groupService.myGroups(paidById).stream()
+                .filter(g -> g.getId().equals(groupId))
+                .findFirst()
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
-        User paidBy = userRepo.findById(req.getPaidBy())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        double share = amount / users.size();
 
-        SplitStrategy strategy = strategyMap.get(req.getSplitType().name());
+        User paidBy = userRepo.findById(paidById)
+                .orElseThrow(() -> new RuntimeException("Payer not found"));
 
-        if (strategy == null) {
-            throw new IllegalArgumentException("Invalid split type");
-        }
+        for (Long userId : users) {
 
-        Map<User, BigDecimal> splits;
-
-        if (req.getSplitType() == SplitType.EQUAL) {
-            splits = strategy.calculateSplits(
-                    req.getTotalAmount(),
-                    group.getMembers().stream()
-                         .collect(Collectors.toMap(u -> u, u -> BigDecimal.ZERO))
-            );
-        } else {
-            splits = strategy.calculateSplits(
-                    req.getTotalAmount(),
-                    req.resolveUsers(userRepo)
-            );
-        }
-
-        Expense expense = new Expense(
-                null,
-                req.getTotalAmount(),
-                req.getSplitType(),
-                paidBy,
-                group,
-                LocalDateTime.now()
-        );
-
-        expenseRepo.save(expense);
-
-        splits.forEach((user, amount) -> {
-            splitRepo.save(new ExpenseSplit(null, expense, user, amount));
-            if (!user.equals(paidBy)) {
-                balanceService.updateBalance(user, paidBy, amount);
+            if (userId.equals(paidById)) {
+                continue;
             }
-        });
 
-        return expense;
-    }
+            User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-    @Override
-    public List<Expense> getAllExpenses() {
-        return expenseRepo.findAll();
+            Balance balance = balanceRepo
+                    .findByFromUserIdAndToUserIdAndGroupId(userId, paidById, groupId)
+                    .orElse(new Balance(
+                            null,
+                            user,
+                            paidBy,
+                            group,
+                            0.0
+                    ));
+
+            balance.setAmount(balance.getAmount() + share);
+            balanceRepo.save(balance);
+        }
     }
 }

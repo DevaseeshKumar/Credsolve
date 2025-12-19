@@ -1,127 +1,193 @@
-import { useEffect, useState } from "react";
 import api from "../api/api";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { successToast, errorToast } from "../utils/toast";
 
 export default function Groups() {
   const [groups, setGroups] = useState([]);
   const [users, setUsers] = useState([]);
   const [groupName, setGroupName] = useState("");
+  const [groupId, setGroupId] = useState("");
+  const [userId, setUserId] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [selectedGroup, setSelectedGroup] = useState("");
-  const [selectedUser, setSelectedUser] = useState("");
-
-  const loadGroups = async () => {
-    const res = await api.get("/groups/viewgroups");
-    setGroups(res.data);
-  };
-
-  const loadUsers = async () => {
-    const res = await api.get("/users");
-    setUsers(res.data);
-  };
-
-  const createGroup = async () => {
-    if (!groupName) return alert("Enter group name");
-    await api.post("/groups", { name: groupName });
-    setGroupName("");
-    loadGroups();
-  };
-
-  const addUserToGroup = async () => {
-    if (!selectedGroup || !selectedUser) {
-      return alert("Select both group and user");
+  const loadData = async () => {
+    try {
+      const [groupsRes, usersRes] = await Promise.all([
+        api.get("/groups"),
+        api.get("/auth/users")
+      ]);
+      setGroups(groupsRes.data);
+      setUsers(usersRes.data);
+    } catch {
+      errorToast("Failed to load groups or users");
     }
-
-    await api.post(`/groups/${selectedGroup}/add/${selectedUser}`);
-    setSelectedGroup("");
-    setSelectedUser("");
-    loadGroups();
   };
 
   useEffect(() => {
-    loadGroups();
-    loadUsers();
+    loadData();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+  const createGroup = async () => {
+    if (!groupName) {
+      errorToast("Group name is required");
+      return;
+    }
 
-        {/* Create Group */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-xl font-semibold mb-4">Create Group</h2>
+    try {
+      setLoading(true);
+      await api.post("/groups", null, { params: { name: groupName } });
+      successToast("Group created successfully");
+      setGroupName("");
+      loadData();
+    } catch {
+      errorToast("Failed to create group");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addUser = async () => {
+    if (!groupId || !userId) {
+      errorToast("Select both group and user");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await api.post(`/groups/${groupId}/add`, null, {
+        params: { userId }
+      });
+      successToast("User added to group");
+      setGroupId("");
+      setUserId("");
+      loadData();
+    } catch {
+      errorToast("Failed to add user to group");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 p-8">
+      <div className="max-w-6xl mx-auto space-y-10">
+
+        {/* CREATE GROUP */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/90 backdrop-blur-xl p-6 rounded-2xl shadow-xl"
+        >
+          <h2 className="text-2xl font-bold text-indigo-700 mb-4">
+            Create Group
+          </h2>
+
           <div className="flex gap-4">
             <input
-              className="input"
-              placeholder="Group Name"
+              placeholder="Group name"
               value={groupName}
               onChange={e => setGroupName(e.target.value)}
+              className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
             />
-            <button className="btn" onClick={createGroup}>
+
+            <button
+              onClick={createGroup}
+              disabled={loading}
+              className={`px-6 rounded-xl text-white font-semibold transition-all
+                ${loading
+                  ? "bg-indigo-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-[1.03]"
+                }`}
+            >
               Create
             </button>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Add Member Using Dropdowns */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-xl font-semibold mb-4">Add Member to Group</h2>
+        {/* ADD USER TO GROUP */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white/90 backdrop-blur-xl p-6 rounded-2xl shadow-xl"
+        >
+          <h2 className="text-2xl font-bold text-indigo-700 mb-4">
+            Add User to Group
+          </h2>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <select
-              className="input"
-              value={selectedGroup}
-              onChange={e => setSelectedGroup(e.target.value)}
+              value={groupId}
+              onChange={e => setGroupId(e.target.value)}
+              className="px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">Select Group</option>
               {groups.map(g => (
                 <option key={g.id} value={g.id}>
-                  {g.name} (ID: {g.id})
+                  {g.name}
                 </option>
               ))}
             </select>
 
             <select
-              className="input"
-              value={selectedUser}
-              onChange={e => setSelectedUser(e.target.value)}
+              value={userId}
+              onChange={e => setUserId(e.target.value)}
+              className="px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">Select User</option>
               {users.map(u => (
                 <option key={u.id} value={u.id}>
-                  {u.name} (ID: {u.id})
+                  {u.name}
                 </option>
               ))}
             </select>
+
+            <button
+              onClick={addUser}
+              disabled={loading}
+              className={`rounded-xl text-white font-semibold transition-all
+                ${loading
+                  ? "bg-indigo-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-[1.03]"
+                }`}
+            >
+              Add User
+            </button>
           </div>
+        </motion.div>
 
-          <button className="btn mt-4" onClick={addUserToGroup}>
-            Add User
-          </button>
-        </div>
+        {/* GROUPS LIST */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            My Groups
+          </h2>
 
-        {/* View Groups */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-xl font-semibold mb-4">Groups</h2>
-
-          {groups.map(g => (
-            <div key={g.id} className="border rounded p-4 mb-4">
-              <strong className="text-indigo-600">
-                {g.name} (ID: {g.id})
-              </strong>
-
-              {g.members.length === 0 ? (
-                <p className="text-gray-500 mt-2">No members yet</p>
-              ) : (
-                <ul className="ml-4 mt-2 list-disc">
-                  {g.members.map(m => (
-                    <li key={m.id}>
-                      {m.name} (ID: {m.id})
-                    </li>
-                  ))}
-                </ul>
-              )}
+          {groups.length === 0 ? (
+            <div className="bg-white p-6 rounded-xl shadow text-center text-gray-500">
+              No groups created yet
             </div>
-          ))}
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {groups.map((g, index) => (
+                <motion.div
+                  key={g.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="bg-white rounded-2xl shadow-lg p-6 border-t-4 border-purple-500"
+                >
+                  <h3 className="text-lg font-bold text-purple-700">
+                    {g.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Members: {g.members?.length || "N/A"}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>

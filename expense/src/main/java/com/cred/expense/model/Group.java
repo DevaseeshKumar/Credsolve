@@ -3,23 +3,26 @@ package com.cred.expense.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "expense_group")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "expense_groups")
 public class Group {
 
     @Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String name;
 
+    @ManyToOne
+    private User createdBy;
+
     @ManyToMany
-    private List<User> members = new ArrayList<>();
+    private Set<User> members = new HashSet<>();
 }

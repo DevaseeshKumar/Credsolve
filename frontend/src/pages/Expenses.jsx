@@ -1,145 +1,148 @@
-import { useEffect, useState } from "react";
 import api from "../api/api";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { successToast, errorToast } from "../utils/toast";
 
 export default function Expenses() {
-  const [expenses, setExpenses] = useState([]);
   const [groups, setGroups] = useState([]);
   const [users, setUsers] = useState([]);
-
   const [groupId, setGroupId] = useState("");
-  const [paidBy, setPaidBy] = useState("");
-  const [totalAmount, setTotalAmount] = useState("");
-  const [splitType, setSplitType] = useState("EQUAL");
+  const [amount, setAmount] = useState("");
+  const [participants, setParticipants] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [splits, setSplits] = useState({});
-
-  /* Load data */
-  const loadExpenses = async () => {
-    const res = await api.get("/expenses/viewexpenses");
-    setExpenses(res.data);
-  };
-
-  const loadGroups = async () => {
-    const res = await api.get("/groups/viewgroups");
-    setGroups(res.data);
-  };
-
-  const loadUsers = async () => {
-    const res = await api.get("/users");
-    setUsers(res.data);
+  const loadData = async () => {
+    try {
+      const [groupsRes, usersRes] = await Promise.all([
+        api.get("/groups"),
+        api.get("/auth/users")
+      ]);
+      setGroups(groupsRes.data);
+      setUsers(usersRes.data);
+    } catch {
+      errorToast("Failed to load groups or users");
+    }
   };
 
   useEffect(() => {
-    loadExpenses();
-    loadGroups();
-    loadUsers();
+    loadData();
   }, []);
 
-  /* Handle split input */
-  const updateSplit = (userId, value) => {
-    setSplits({ ...splits, [userId]: Number(value) });
+  const toggleParticipant = id => {
+    setParticipants(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id]
+    );
   };
 
-  /* Submit expense */
-  const submitExpense = async () => {
-    if (!groupId || !paidBy || !totalAmount) {
-      return alert("Fill all required fields");
+  const addExpense = async () => {
+    if (!groupId || !amount || participants.length === 0) {
+      errorToast("Select group, amount, and participants");
+      return;
     }
 
-    await api.post("/expenses", {
-      groupId: Number(groupId),
-      paidBy: Number(paidBy),
-      totalAmount: Number(totalAmount),
-      splitType,
-      splits
-    });
+    try {
+      setLoading(true);
 
-    setTotalAmount("");
-    setSplits({});
-    loadExpenses();
+      await api.post("/expenses", participants, {
+        params: { groupId, amount }
+      });
+
+      successToast("Expense added successfully");
+      setGroupId("");
+      setAmount("");
+      setParticipants([]);
+
+    } catch {
+      errorToast("Failed to add expense");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 p-8">
+      <div className="max-w-6xl mx-auto">
 
-        {/* Add Expense */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-xl font-semibold mb-6">Add Expense</h2>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/90 backdrop-blur-xl p-6 rounded-2xl shadow-xl"
+        >
+          <h2 className="text-2xl font-bold text-indigo-700 mb-6">
+            Add Expense
+          </h2>
 
-          <div className="grid grid-cols-2 gap-4">
-
-            {/* Group */}
-            <select className="input" value={groupId}
-              onChange={e => setGroupId(e.target.value)}>
+          {/* GROUP & AMOUNT */}
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            <select
+              value={groupId}
+              onChange={e => setGroupId(e.target.value)}
+              className="px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500"
+            >
               <option value="">Select Group</option>
               {groups.map(g => (
-                <option key={g.id} value={g.id}>{g.name}</option>
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
               ))}
             </select>
 
-            {/* Paid By */}
-            <select className="input" value={paidBy}
-              onChange={e => setPaidBy(e.target.value)}>
-              <option value="">Paid By</option>
-              {users.map(u => (
-                <option key={u.id} value={u.id}>{u.name}</option>
-              ))}
-            </select>
-
-            {/* Amount */}
-            <input className="input col-span-2"
-              placeholder="Total Amount"
-              value={totalAmount}
-              onChange={e => setTotalAmount(e.target.value)}
+            <input
+              type="number"
+              placeholder="Amount"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              className="px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500"
             />
-
-            {/* Split Type */}
-            <select className="input col-span-2"
-              value={splitType}
-              onChange={e => setSplitType(e.target.value)}>
-              <option value="EQUAL">EQUAL</option>
-              <option value="EXACT">EXACT</option>
-              <option value="PERCENTAGE">PERCENTAGE</option>
-            </select>
           </div>
 
-          {/* Split Inputs */}
-          {splitType !== "EQUAL" && (
-            <div className="mt-6">
-              <h3 className="font-semibold mb-3">Split Details</h3>
+          {/* PARTICIPANTS */}
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Select Participants
+          </h3>
 
-              {users.map(u => (
-                <div key={u.id} className="flex gap-4 mb-2">
-                  <span className="w-40">{u.name}</span>
-                  <input
-                    className="input"
-                    type="number"
-                    placeholder={splitType === "EXACT" ? "Amount" : "Percentage"}
-                    onChange={e => updateSplit(u.id, e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          <button className="btn mt-6" onClick={submitExpense}>
-            Submit Expense
-          </button>
-        </div>
-
-        {/* View Expenses */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-xl font-semibold mb-4">Expenses</h2>
-          <ul className="space-y-2">
-            {expenses.map(e => (
-              <li key={e.id} className="p-3 bg-gray-50 rounded">
-                #{e.id} | ₹{e.totalAmount} | Paid by {e.paidBy.name} | {e.splitType}
-              </li>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
+            {users.map(u => (
+              <motion.label
+                key={u.id}
+                whileHover={{ scale: 1.03 }}
+                className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer border transition
+                  ${participants.includes(u.id)
+                    ? "bg-indigo-50 border-indigo-500"
+                    : "bg-white border-gray-300"
+                  }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={participants.includes(u.id)}
+                  onChange={() => toggleParticipant(u.id)}
+                  className="accent-indigo-600"
+                />
+                <span className="font-medium text-gray-700">
+                  {u.name}
+                </span>
+              </motion.label>
             ))}
-          </ul>
-        </div>
+          </div>
 
+          {/* BOTTOM BUTTON */}
+          <div className="flex justify-center">
+            <button
+              onClick={addExpense}
+              disabled={loading}
+              className={`w-full md:w-1/2 py-4 rounded-2xl text-lg font-bold text-white transition-all
+                ${loading
+                  ? "bg-indigo-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-[1.02] shadow-lg"
+                }`}
+            >
+              {loading ? "Adding Expense..." : "Add Expense"}
+            </button>
+          </div>
+
+        </motion.div>
       </div>
     </div>
   );

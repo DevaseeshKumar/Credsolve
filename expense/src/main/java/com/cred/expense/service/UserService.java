@@ -1,12 +1,18 @@
 package com.cred.expense.service;
 
+import com.cred.expense.dto.LoginRequest;
+import com.cred.expense.dto.RegisterRequest;
 import com.cred.expense.model.User;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface UserService {
-    User createUser(User user);
-    User getUser(Long id);
-    List<User> getAllUsers();
+
+    User register(RegisterRequest req);
+
+    User login(LoginRequest req);
+
+    User getById(Long id);
+
+    List<User> findAll();
 }

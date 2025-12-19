@@ -3,32 +3,29 @@ package com.cred.expense.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(
-    uniqueConstraints = @UniqueConstraint(
-        columnNames = {"from_user_id", "to_user_id", "group_id"}
-    )
-)
-public class Balance {
+public class SettlementHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "from_user_id")
     private User fromUser;
 
     @ManyToOne
-    @JoinColumn(name = "to_user_id")
     private User toUser;
 
     @ManyToOne
     private Group group;
 
     private double amount;
+
+    private LocalDateTime settledAt = LocalDateTime.now();
 }

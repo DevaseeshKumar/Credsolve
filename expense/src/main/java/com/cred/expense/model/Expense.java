@@ -3,9 +3,7 @@ package com.cred.expense.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -14,14 +12,13 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Expense {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private BigDecimal totalAmount;
 
-    @Enumerated(EnumType.STRING)
-    private SplitType splitType;
+    private String description;
+
+    private double amount;
 
     @ManyToOne
     private User paidBy;
@@ -29,5 +26,5 @@ public class Expense {
     @ManyToOne
     private Group group;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
