@@ -85,11 +85,21 @@ User
 
 Project Structure
 
-    credsolve
-        /backend        --> Spring Boot backend (controllers, services, repositories, entities)
-        /frontend       --> React frontend with Tailwind CSS
-        .gitignore
-        README.md
+    cred-expense/
+        ├── backend/
+        │   ├── controller/
+        │   ├── service/
+        │   ├── service/impl/
+        │   ├── repository/
+        │   ├── model/
+        │   └── application.properties
+        ├── frontend/
+        │   ├── components/
+        │   ├── pages/
+        │   ├── layouts/
+        │   ├── utils/
+        │   └── main.jsx
+        ├── README.md
 
 Setup Instructions
 
@@ -119,7 +129,7 @@ Backend runs by default on:
 
 http://localhost:8080
 
-Application Flow
+Application Workflow
 
     User registers and logs in
 
@@ -133,3 +143,4 @@ Application Flow
 
     Settlement history is recorded permanently
 
+![Workflow](image.png)
