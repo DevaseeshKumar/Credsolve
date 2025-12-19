@@ -1,154 +1,135 @@
-Expense Sharing Application 
-Overview
+CRED Expense Management System
 
-This project is a simplified expense sharing application.
-It allows users to create groups, add shared expenses, track balances, and settle dues.
+A full-stack web application to manage shared expenses, group-based bill splitting, settlements, and transaction history with a modern, intuitive user experience.
 
-The application is built with a clean backend architecture and a user-friendly frontend.
+Project Overview
 
-Tech Stack
+    CRED Expense is designed to simplify expense sharing among friends, teams, or groups:
 
-Backend
+    Users can create groups, add members, and record shared expenses.
 
-Java 21
-Spring Boot
-Spring Data JPA (Hibernate)
-MySQL
-Lombok
+    Expenses are automatically split and balances are calculated transparently.
 
-Frontend
+    Users can settle dues and track full settlement history.
 
-React
-Vite
-Tailwind CSS
-Axios
+    The system ensures accuracy, clarity, and ease of financial collaboration.
 
-Structure
+    Focused on simplicity, transparency, and real-time financial tracking.
 
-cred/
-├── expense/                      # Backend (Spring Boot)
-│   ├── src/main/java/com/cred/expense
-│   │   ├── controller            # REST controllers
-│   │   ├── service               # Service interfaces & implementations
-│   │   ├── repository            # JPA repositories
-│   │   ├── model                 # Entity classes
-│   │   ├── strategy              # Expense split strategies
-│   │   └── config                # CORS and configuration
-│   │
-│   ├── src/main/resources
-│   │   ├── application.example.properties
-│   │   └── static
-│   │
-│   └── pom.xml
-│
-├── frontend/                     # Frontend (React + Vite)
-│   ├── src
-│   │   ├── components            # Reusable UI components
-│   │   ├── pages                 # Users, Groups, Expenses, Settle
-│   │   ├── api                   # Axios configuration
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   │
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
-│
-└── .gitignore
+Key Highlights
 
-Backend Setup
-Database Setup
+    Group-Based Expense Management
 
-Create a MySQL database:
+    Create groups and manage members.
 
-CREATE DATABASE expense;
+    Track expenses per group clearly.
 
-Configuration
+    Smart Expense Splitting
 
-Rename the example configuration file:
+    Automatically splits expenses among selected participants.
 
-expense/src/main/resources/application.example.properties
-→ application.properties
+    Calculates who owes whom and how much.
+
+    Balance Tracking & Settlements
+
+    Real-time balance computation.
+
+    One-click settlement of dues.
+
+    Removes settled balances automatically.
+
+    Settlement History
+
+    Complete audit trail of all settlements.
+
+    View payer, receiver, group, amount, and timestamp.
+
+Notifications & UX
+
+    Toast-based success and error notifications.
+
+    Clean, modern UI for better user understanding.
+
+Technology Stack
+
+    Layer	Technology / Tool
+    Frontend	React 19, Tailwind CSS, Axios, Framer Motion, React Toastify
+    Backend	Spring Boot, Java, JPA / Hibernate
+    Database	MySQL
+    Authentication	Session-based authentication
+    Build Tool	Maven
+
+Features
+
+User
+
+    Register and login securely
+
+    Create and manage groups
+
+    Add expenses with selected participants
+
+    View outstanding balances
+
+    Settle dues with other users
+
+    View complete settlement history
+
+    Dashboard overview of financial activity
+
+    Secure session handling
+
+    Consistent transaction tracking
+
+    Audit-ready settlement records
+
+Project Structure
+
+    credsolve
+        /backend        --> Spring Boot backend (controllers, services, repositories, entities)
+        /frontend       --> React frontend with Tailwind CSS
+        .gitignore
+        README.md
+
+Setup Instructions
+
+Backend (Spring Boot)
+    cd backend
+    mvn clean install
+    mvn spring-boot:run
 
 
-Update the database credentials inside the file.
+Configure database credentials in:
 
-Run Backend
-cd expense
-mvn spring-boot:run
+src/main/resources/application.properties
 
+Frontend (React + Vite)
+    cd frontend
+    npm install
+    npm run dev
 
-Backend runs at:
+Access
 
-http://localhost:8080
-
-Frontend Setup
-Install Dependencies
-cd frontend
-npm install
-
-Run Frontend
-npm run dev
-
-
-Frontend runs at:
+Open the application in your browser:
 
 http://localhost:5173
 
-Application Workflow
-User Management
 
-Users are created from the Users page
+Backend runs by default on:
 
-All users can be viewed in a list
+http://localhost:8080
 
-Group Management
+Application Flow
 
-Groups are created from the Groups page
+    User registers and logs in
 
-Users are added to groups using dropdown selection
+    Creates groups and adds members
 
-Expense Creation
+    Adds expenses with participants
 
-Select a group
+    System calculates balances automatically
 
-Choose who paid
+    Users settle dues
 
-Enter total amount
+    Settlement history is recorded permanently
 
-Choose split type:
-
-Equal
-
-Exact
-
-Percentage
-
-Expense shares are calculated automatically
-
-Balances are updated accordingly
-
-Balance Tracking
-
-The system tracks who owes whom
-
-Balances are simplified automatically
-
-Only net balances are stored
-
-Settlement
-
-Select debtor and creditor
-
-Outstanding balance is auto-filled
-
-Manual amount entry is disabled
-
-Settlement clears or reduces balances
-
-Over-settlement is prevented
-
-Expense Split Strategies
-Strategy	Description
-Equal	Split equally among all group members
-Exact	Each user pays a fixed amount
-Percentage	Split based on percentage values
