@@ -52,12 +52,30 @@ Notifications & UX
 
 Technology Stack
 
-    Layer	Technology / Tool
-    Frontend	React 19, Tailwind CSS, Axios, Framer Motion, React Toastify
-    Backend	Spring Boot, Java, JPA / Hibernate
-    Database	MySQL
-    Authentication	Session-based authentication
-    Build Tool	Maven
+Frontend
+<p> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original.svg" width="40" height="40" alt="React"/> <img src="https://www.vectorlogo.zone/logos/tailwindcss/tailwindcss-icon.svg" width="40" height="40" alt="Tailwind CSS"/> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/axios/axios-plain.svg" width="40" height="40" alt="Axios"/> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" width="40" height="40" alt="JavaScript"/> </p>
+
+React 19 • Tailwind CSS • Axios • Framer Motion • React Toastify
+
+Backend
+<p> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" width="40" height="40" alt="Java"/> <img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" width="40" height="40" alt="Spring Boot"/> </p>
+
+Spring Boot • Java • JPA / Hibernate
+
+Database
+<p> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mysql/mysql-original.svg" width="40" height="40" alt="MySQL"/> </p>
+
+MySQL
+
+Authentication
+<p> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/spring/spring-original.svg" width="40" height="40" alt="Spring Security"/> </p>
+
+Session-based Authentication
+
+Build Tool
+<p> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/maven/maven-original.svg" width="40" height="40" alt="Maven"/> </p>
+
+Maven
 
 Features
 
@@ -89,7 +107,6 @@ Project Structure
         ├── backend/
         │   ├── controller/
         │   ├── service/
-        │   ├── service/impl/
         │   ├── repository/
         │   ├── model/
         │   └── application.properties

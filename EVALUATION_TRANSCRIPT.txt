@@ -1,0 +1,156 @@
+CRED EXPENSE MANAGEMENT SYSTEM
+EVALUATION TRANSCRIPT
+=====================
+
+This document records test interactions used to evaluate correctness,
+robustness, and edge-case handling of the CRED Expense Management System.
+
+--------------------------------------------------
+1. SUCCESSFUL INTERACTIONS
+--------------------------------------------------
+
+Scenario 1: User Registration
+Input:
+- Name: Rahul
+- Email: rahul@test.com
+- Password: ******
+
+System Decision:
+- Email not registered
+- User created successfully
+
+Output:
+- User stored in database
+- Success response returned
+
+Result:
+STATUS: PASS
+
+
+Scenario 2: Add Expense with Valid Participants
+Input:
+- Group: Trip Group
+- Amount: 1200
+- Participants: User A, User B, User C
+
+System Decision:
+- Group exists
+- Participants valid
+- Equal split calculated (₹400 each)
+
+Output:
+- Balances created
+- Success toast displayed
+
+Result:
+STATUS: PASS
+
+
+Scenario 3: Settle Balance
+Input:
+- User settles balance of ₹400 with User B
+
+System Decision:
+- Balance exists
+- Settlement allowed
+
+Output:
+- Balance removed
+- Settlement history recorded
+
+Result:
+STATUS: PASS
+
+--------------------------------------------------
+2. FAILED INTERACTIONS
+--------------------------------------------------
+
+Scenario 4: Login with Incorrect Password
+Input:
+- Email: rahul@test.com
+- Password: wrongpass
+
+System Decision:
+- Password mismatch
+
+Output:
+- Error message returned
+- Login denied
+
+Result:
+STATUS: FAIL (Handled Correctly)
+
+
+Scenario 5: Add Expense without Participants
+Input:
+- Group selected
+- Amount entered
+- No participants
+
+System Decision:
+- Validation failed
+
+Output:
+- Error toast shown
+- No database update
+
+Result:
+STATUS: FAIL (Handled Correctly)
+
+--------------------------------------------------
+3. EDGE-CASE INTERACTIONS
+--------------------------------------------------
+
+Scenario 6: Settle Already Settled Balance
+Input:
+- Attempt to settle a non-existing balance
+
+System Decision:
+- Balance not found
+
+Output:
+- Error response returned
+- System remains stable
+
+Result:
+STATUS: EDGE CASE HANDLED
+
+
+Scenario 7: User Adds Expense to Unauthorized Group
+Input:
+- User not part of selected group
+
+System Decision:
+- Authorization failed
+
+Output:
+- Request denied
+
+Result:
+STATUS: EDGE CASE HANDLED
+
+
+Scenario 8: Concurrent Expense Creation
+Input:
+- Two expenses added simultaneously to same group
+
+System Decision:
+- Transactions processed sequentially
+
+Output:
+- No data inconsistency
+- Correct balances maintained
+
+Result:
+STATUS: EDGE CASE HANDLED
+
+--------------------------------------------------
+SUMMARY
+--------------------------------------------------
+
+- All critical user flows tested
+- System handles invalid inputs gracefully
+- No crashes or data corruption observed
+- Decision logic is predictable and consistent
+
+END OF EVALUATION TRANSCRIPT
